@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-await ConfigModule.forRoot(); // Ensure env variables are loaded
+ConfigModule.forRoot(); // Ensure env variables are loaded
 
 console.log('🔍 JWT_SECRET_KEY:', process.env.JWT_SECRET_KEY); // Debug log
 
@@ -15,4 +15,4 @@ async function bootstrap() {
   app.setGlobalPrefix('v1/api'); // Optional, set a global prefix for all route
   await app.listen(process.env.PORT ?? 3000);
 }
-await bootstrap();
+bootstrap();

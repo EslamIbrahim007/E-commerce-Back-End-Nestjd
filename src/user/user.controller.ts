@@ -20,28 +20,28 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @Roles(['admin'])
+  @Roles('admin')
   @UseGuards(AuthGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  @Roles(['admin'])
+  @Roles('admin')
   @UseGuards(AuthGuard)
-  findAll(@Query() query) {
+  findAll(@Query() query: Record<string, unknown>) {
     return this.userService.findAll(query);
   }
 
   @Get(':id')
-  @Roles(['admin'])
+  @Roles('admin')
   @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles(['admin'])
+  @Roles('admin')
   @UseGuards(AuthGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);

@@ -10,12 +10,13 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Role } from '../enums/role.enum';
 
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(3, { message: 'password must be at lest 8 characters' })
-  @MaxLength(20, { message: 'password is too long :)' })
+  @MinLength(3, { message: 'name must be at lest 3 characters' })
+  @MaxLength(20, { message: 'name is too long :)' })
   name: string;
 
   @IsNotEmpty()
@@ -28,10 +29,9 @@ export class CreateUserDto {
   @MaxLength(30, { message: 'password is too long :)' })
   password: string;
 
-  @IsString()
-  @IsEnum(['admin', 'user'])
   @IsOptional()
-  role: string;
+  @IsEnum(Role)
+  role?: Role;
 
   @IsOptional()
   avatar: string;
