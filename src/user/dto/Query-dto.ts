@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsInt, IsObject, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UserQueryDto {
@@ -14,6 +14,7 @@ export class UserQueryDto {
 
   @IsOptional()
   @IsString()
+  @IsObject()
   sort?: string;
 
   @IsOptional()

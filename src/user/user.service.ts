@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -9,20 +10,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Repository, FindManyOptions, Equal, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Role } from './enums/role.enum';
+import { UserQueryDto } from './dto/Query-dto';
 
-interface UserQuery {
-  limit?: string | number;
-  skip?: string | number;
-  sort?: string | Record<string, 'ASC' | 'DESC'>;
-  name?: string;
-  email?: string;
-  role?: string;
-}
 @Injectable()
 export class UserService {
   constructor(
@@ -71,75 +65,62 @@ export class UserService {
     };
   }
 
-  async findAll(query: UserQuery): Promise<{
+  async findAll(query: UserQueryDto): Promise<{
     status: number;
     message: string;
     data: UserResponseDto[];
     meta: { total: number; limit: number; skip: number };
   }> {
     const { limit, skip, sort, name, email, role } = query;
+    // Build QueryBuilder
+    const qb = this.usersRepository.createQueryBuilder('user');
 
-    // Validate and parse pagination
-    const parsedLimit = limit ? Number(limit) : 10; // Default limit
-    const parsedSkip = skip ? Number(skip) : 0;
-    if (isNaN(parsedLimit) || parsedLimit < 0) {
-      throw new Error('Invalid limit: must be a non-negative number');
+    // Filters
+    if (name) {
+      qb.andWhere('user.name ILIKE :name', { name: `%${name}%` });
     }
-    if (isNaN(parsedSkip) || parsedSkip < 0) {
-      throw new Error('Invalid skip: must be a non-negative number');
+    if (email) {
+      qb.andWhere('user.email ILIKE :email', { email: `%${email}%` });
     }
-
-    const options: FindManyOptions<User> = {
-      take: parsedLimit,
-      skip: parsedSkip,
-    };
-    // Handle sorting
+    if (role) {
+      qb.andWhere('user.role = :role', { role });
+    }
+    // Sorting
     if (sort) {
+      let sortObj: Record<string, 'ASC' | 'DESC'>;
       try {
-        const sortObj =
-          typeof sort === 'string'
-            ? (JSON.parse(sort) as Record<string, 'ASC' | 'DESC'>)
-            : sort;
-        const validSortFields = ['name', 'email', 'role', 'createdAt'];
-        for (const key of Object.keys(sortObj)) {
-          if (!validSortFields.includes(key)) {
-            throw new Error(`Invalid sort field: ${key}`);
-          }
-        }
-        options.order = sortObj;
+        sortObj = (
+          typeof sort === 'string' ? JSON.parse(sort) : sort
+        ) as Record<string, 'ASC' | 'DESC'>;
       } catch {
-        throw new Error('Invalid sort parameter: must be valid JSON or object');
+        throw new BadRequestException('Invalid sort format');
       }
-    }
 
-    // Handle filters
-    const filters = { name, email, role };
-    options.where = {};
-    for (const [key, value] of Object.entries(filters)) {
-      if (typeof value === 'string' && value) {
-        if (key === 'name' || key === 'email') {
-          (options.where as Record<string, any>)[key] = Like(`%${value}%`); // Partial match
-        } else {
-          (options.where as Record<string, any>)[key] = Equal(value); // Exact match for role
+      const validFields = ['name', 'email', 'role', 'createdAt'] as const;
+      for (const field of Object.keys(sortObj)) {
+        if (!validFields.includes(field as (typeof validFields)[number])) {
+          throw new BadRequestException(`Cannot sort by ${field}`);
         }
+        qb.addOrderBy(`user.${field}`, sortObj[field]);
       }
-    }
-    if (Object.keys(options.where).length === 0) {
-      delete options.where;
+    } else {
+      qb.addOrderBy('user.createdAt', 'DESC');
     }
 
-    // Execute query
+    // Pagination
+    qb.skip(skip).take(limit);
+    // Execute
+    const [results, total] = await qb.getManyAndCount();
 
-    const [results, total] = await this.usersRepository.findAndCount(options);
-    // Transform User entities to UserResponseDto
-    const transformedResults = plainToInstance(UserResponseDto, results, {
-      excludeExtraneousValues: true, // Only include @Expose fields
+    // Map to DTO
+    const data = plainToInstance(UserResponseDto, results, {
+      excludeExtraneousValues: true,
     });
     return {
       status: 200,
       message: 'Users fetched successfully',
-      data: transformedResults,
-      meta: { total, limit: parsedLimit, skip: parsedSkip },
+      data,
+      meta: { total, limit, skip },
     };
   }
 

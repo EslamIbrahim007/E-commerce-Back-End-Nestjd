@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
       signOptions: { expiresIn: '5d' },
     }),
     DatabaseModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
