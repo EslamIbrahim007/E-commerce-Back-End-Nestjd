@@ -41,6 +41,12 @@ export class User {
   @Column({ type: 'enum', enum: ['male', 'female'], nullable: true })
   gender: string;
 
+  @Column({ type: 'varchar', nullable: true, default: null })
+  resetPasswordToken: string | null;
+
+  @Column({ type: 'timestamp', nullable: true, default: null })
+  resetPasswordExpires: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
