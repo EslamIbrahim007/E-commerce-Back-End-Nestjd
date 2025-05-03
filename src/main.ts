@@ -5,8 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 
 ConfigModule.forRoot(); // Ensure env variables are loaded
 
-console.log('🔍 JWT_SECRET_KEY:', process.env.JWT_SECRET_KEY); // Debug log
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(

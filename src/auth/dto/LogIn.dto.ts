@@ -1,10 +1,11 @@
+/* eslint-disable prettier/prettier */
 import {
   IsNotEmpty,
   MinLength,
   MaxLength,
   IsString,
   IsEmail,
-  } from 'class-validator';
+} from 'class-validator';
 
 export class LogInDto {
   @IsEmail({}, { message: 'Email must be valid' })
