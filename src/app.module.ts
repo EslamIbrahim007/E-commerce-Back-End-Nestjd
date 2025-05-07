@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { MailModule } from './mail/mail.module';
+import { jwtConfig } from './config/jwt.config';
 
 @Module({
   imports: [
@@ -15,10 +16,11 @@ import { MailModule } from './mail/mail.module';
     }),
     UserModule,
     PassportModule,
-    JwtModule.register({
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: jwtConfig,
+      inject: [ConfigService],
       global: true,
-      secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: '5d' },
     }),
     DatabaseModule,
     AuthModule,

@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-//import { AuthGuard } from 'src/guard/auth.guard';
 import { Roles } from 'src/decorator/role.decorator';
 import { Request } from 'express';
 import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
 import { User } from 'src/user/entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { Role } from 'src/user/enums/role.enum';
 
 interface RequestWithUser extends Request {
   user: User;
@@ -17,13 +17,13 @@ export class ProfileController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @Roles('user')
+  @Roles(Role.USER)
   get(@Req() req: RequestWithUser) {
     return this.profileService.getProfile(req);
   }
   @Patch('update')
   @UseGuards(JwtAuthGuard)
-  @Roles('user')
+  @Roles(Role.USER)
   update(
     @Req() req: RequestWithUser,
     @Body() updateProfileDto: UpdateProfileDto,
@@ -32,7 +32,7 @@ export class ProfileController {
   }
   @Patch('deactive')
   @UseGuards(JwtAuthGuard)
-  @Roles('user')
+  @Roles(Role.USER)
   deactive(@Req() req: RequestWithUser) {
     return this.profileService.deactivateAccount(req);
   }

@@ -7,16 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailModule } from 'src/mail/mail.module';
+import { jwtConfig } from 'src/config/jwt.config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET_KEY')!,
-        signOptions: { expiresIn: '1d' },
-      }),
+      useFactory: jwtConfig,
       inject: [ConfigService],
     }),
     MailModule,
