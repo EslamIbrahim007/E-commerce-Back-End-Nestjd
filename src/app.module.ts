@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { MailModule } from './mail/mail.module';
 import { jwtConfig } from './config/jwt.config';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { jwtConfig } from './config/jwt.config';
     AuthModule,
     ProfileModule,
     MailModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
